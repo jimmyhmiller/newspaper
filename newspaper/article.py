@@ -12,7 +12,6 @@ from urllib.parse import urlparse
 
 import requests
 
-from . import images
 from . import network
 from . import nlp
 from . import settings
@@ -283,35 +282,10 @@ class Article(object):
             self.set_article_html(article_html)
             self.set_text(text)
 
-        self.fetch_images()
 
         self.is_parsed = True
         self.release_resources()
 
-    def fetch_images(self):
-        if self.clean_doc is not None:
-            meta_img_url = self.extractor.get_meta_img_url(
-                self.url, self.clean_doc)
-            self.set_meta_img(meta_img_url)
-
-            imgs = self.extractor.get_img_urls(self.url, self.clean_doc)
-            if self.meta_img:
-                imgs.add(self.meta_img)
-            self.set_imgs(imgs)
-
-        if self.clean_top_node is not None and not self.has_top_image():
-            first_img = self.extractor.get_first_img_url(
-                self.url, self.clean_top_node)
-            if self.config.fetch_images:
-                self.set_top_img(first_img)
-            else:
-                self.set_top_img_no_check(first_img)
-
-        if not self.has_top_image() and self.config.fetch_images:
-            self.set_reddit_top_img()
-
-    def has_top_image(self):
-        return self.top_img is not None and self.top_img != ''
 
     def is_valid_url(self):
         """Performs a check on the url of this link to determine if article

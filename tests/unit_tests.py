@@ -220,7 +220,6 @@ class ArticleTestCase(unittest.TestCase):
         AUTHORS = ['Chien-Ming Wang', 'Dana A. Ford', 'James S.A. Corey',
                    'Tom Watkins']
         TITLE = 'After storm, forecasters see smooth sailing for Thanksgiving'
-        LEN_IMGS = 46
         META_LANG = 'en'
         META_SITE_NAME = 'CNN'
 
@@ -231,15 +230,9 @@ class ArticleTestCase(unittest.TestCase):
         self.assertEqual(text, self.article.text)
         self.assertEqual(text, fulltext(self.article.html))
 
-        # NOTE: top_img extraction requires an internet connection
-        # unlike the rest of this test file
-        TOP_IMG = ('http://i2.cdn.turner.com/cnn/dam/assets/131129200805-'
-                   '01-weather-1128-story-top.jpg')
-        self.assertEqual(TOP_IMG, self.article.top_img)
 
         self.assertCountEqual(AUTHORS, self.article.authors)
         self.assertEqual(TITLE, self.article.title)
-        self.assertEqual(LEN_IMGS, len(self.article.imgs))
         self.assertEqual(META_LANG, self.article.meta_lang)
         self.assertEqual(META_SITE_NAME, self.article.meta_site_name)
         self.assertEqual('2013-11-27 00:00:00', str(self.article.publish_date))
@@ -401,48 +394,6 @@ class ContentExtractorTestCase(unittest.TestCase):
         html = '<meta property="og:url" content="www.example.com/article.html">'
         article_url = 'http://www.example.com/article?foo=bar'
         self.assertEqual(self._get_canonical_link(article_url, html), url)
-
-    def test_get_top_image_from_meta(self):
-        html = '<meta property="og:image" content="https://example.com/meta_img_filename.jpg" />' \
-               '<meta name="og:image" content="https://example.com/meta_another_img_filename.jpg"/>'
-        html_empty_og_content = '<meta property="og:image" content="" />' \
-            '<meta name="og:image" content="https://example.com/meta_another_img_filename.jpg"/>'
-        html_empty_all = '<meta property="og:image" content="" />' \
-            '<meta name="og:image" />'
-        html_rel_img_src = html_empty_all + '<link rel="img_src" href="https://example.com/meta_link_image.jpg" />'
-        html_rel_img_src2 = html_empty_all + '<link rel="image_src" href="https://example.com/meta_link_image2.jpg" />'
-        html_rel_icon = html_empty_all + '<link rel="icon" href="https://example.com/meta_link_rel_icon.ico" />'
-
-        doc = self.parser.fromstring(html)
-        self.assertEqual(
-            self.extractor.get_meta_img_url('http://www.example.com/article?foo=bar', doc),
-            'https://example.com/meta_img_filename.jpg'
-        )
-        doc = self.parser.fromstring(html_empty_og_content)
-        self.assertEqual(
-            self.extractor.get_meta_img_url('http://www.example.com/article?foo=bar', doc),
-            'https://example.com/meta_another_img_filename.jpg'
-        )
-        doc = self.parser.fromstring(html_empty_all)
-        self.assertEqual(
-            self.extractor.get_meta_img_url('http://www.example.com/article?foo=bar', doc),
-            ''
-        )
-        doc = self.parser.fromstring(html_rel_img_src)
-        self.assertEqual(
-            self.extractor.get_meta_img_url('http://www.example.com/article?foo=bar', doc),
-            'https://example.com/meta_link_image.jpg'
-        )
-        doc = self.parser.fromstring(html_rel_img_src2)
-        self.assertEqual(
-            self.extractor.get_meta_img_url('http://www.example.com/article?foo=bar', doc),
-            'https://example.com/meta_link_image2.jpg'
-        )
-        doc = self.parser.fromstring(html_rel_icon)
-        self.assertEqual(
-            self.extractor.get_meta_img_url('http://www.example.com/article?foo=bar', doc),
-            'https://example.com/meta_link_rel_icon.ico'
-        )
 
 
 class SourceTestCase(unittest.TestCase):
